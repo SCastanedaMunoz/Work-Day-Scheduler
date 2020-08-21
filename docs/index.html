@@ -4,20 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <!-- Bootstrap 4.3.1 -->
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     />
+
+    <!-- Font Awesome 5.8.1 -->
     <link
       rel="stylesheet"
       href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
       integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf"
       crossorigin="anonymous"
     />
+
+    <!-- Google Fonts - Open sans -->
     <link
       href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap"
       rel="stylesheet"
     />
+
     <link rel="stylesheet" href="style.css" />
     <title>Work Day Scheduler</title>
   </head>
@@ -32,7 +38,75 @@
       <!-- Timeblocks go here -->
     </div>
 
+    <!-- JQuery 3.4.1 -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <!-- Moment JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+    <script>
+
+      $(document).ready(function() {
+
+        var calendar = {
+          lastSavedDay : "",
+          timeSlots : []
+        };
+        
+        var currentDay = moment().format("dddd, MMMM Do");
+        calendar.lastSavedDay = currentDay;
+        $("#currentDay").text(currentDay);
+
+        calendar = JSON.parse(localStorage.getItem("work-day-schedule"));
+
+        // var currentHour = moment().hour();
+        
+        var currentHour = 12;
+
+        for (var i = 0; i < 9; i ++)
+        {
+            let index = i + 9;
+            var timeTense;
+
+            if (index < currentHour)
+              timeTense = "past";
+            else if (index == currentHour)
+              timeTense = "present";
+            else
+              timeTense = "future";
+
+            var time = moment(index, ["HH.mm"]).format("hA");
+            createDayRow(index, time, timeTense);
+        }
+
+        function createDayRow(index, time, state)
+        {
+          var row = $(`<div class="row time-block">`);
+          $(row).append(`<div class="col-1">`);
+          $(row).append(`<div class="col-1 hour">${time}</div>`);
+          $(row).append(`<textarea class="col-8 ${state} description" id="text-${index}"></textarea>`);
+          $(row).append(`<button class="col-1 btn saveBtn fas fa-save" data-hour="${index}"></button>`);
+
+          $(".container").append(row);
+        }
+
+        $(".saveBtn").on("click", function(event){
+          var hourId = $(this).attr("data-hour");
+          var textContents = $(`#text-${hourId}`).val();
+          var hourEntry = {
+            id : hourId,
+            text : textContents
+          }
+
+          var wasFound = calendar.timeSlots.findIndex(timeSlot => timeSlot.id == hourId);
+        
+          if(wasFound >= 0)
+            calendar.timeSlots.splice(wasFound, 1);
+          
+          calendar.timeSlots.push(hourEntry);
+
+          localStorage.setItem("work-day-schedule", JSON.stringify(calendar));
+        });
+      });
+    </script>
   </body>
 </html>
