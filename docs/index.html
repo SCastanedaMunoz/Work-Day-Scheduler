@@ -78,11 +78,11 @@
             var timeTense;
 
             // Get Time According to Hour
-            if (index < currentHour)
+            if (moment(index).isBefore(currentHour))
               timeTense = "past";
-            else if (index == currentHour)
+            else if (moment(index).isSame(currentHour))
               timeTense = "present";
-            else
+            else if (moment(index).isAfter(currentHour))
               timeTense = "future";
 
             var textContents = "";
